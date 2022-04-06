@@ -1,12 +1,12 @@
 const handler = {};
 
-handler.token = (data) => {
+handler.account = (data) => {
     const acceptableMethods = ['get', 'post', 'put', 'delete'];
 
     if (acceptableMethods.includes(data.httpMethod)) {
-        console.log('Token: veiksmas leistinas');
+        console.log('Account: veiksmas leistinas');
     } else {
-        console.log('Token: veiksmas NEleistinas');
+        console.log('Account: veiksmas NEleistinas');
     }
 }
 
