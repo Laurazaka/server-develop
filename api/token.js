@@ -137,8 +137,52 @@ handler._method.verify = async (token) => {
         return false;
     }
 
-    const [readErr] = await file.read('token', token + '.json');
-    return !readErr;
+    const [readErr, readContent] = await file.read('token', token + '.json');
+    if (readErr) {
+        return false;
+    }
+
+    const obj = utils.parseJSONtoObject(readContent);
+    if (!obj) {
+        return false;
+    }
+
+    if (obj.expire < Date.now()) {
+        await file.delete('token', token + '.json');
+        return false;
+    }
+
+    return true;
+}
+
+handler._method.getUserDetails = async (token) => {
+    if (typeof token !== 'string'
+        || token.length !== config.sessionTokenLength) {
+        return {};
+    }
+
+    const [readErr, readContent] = await file.read('token', token + '.json');
+    if (readErr) {
+        return {};
+    }
+
+    const tokenObj = utils.parseJSONtoObject(readContent);
+    if (!tokenObj) {
+        return {};
+    }
+
+    const { email } = tokenObj;
+    const [userErr, userContent] = await file.read('accounts', email + '.json');
+    if (userErr) {
+        return {};
+    }
+
+    const userObj = utils.parseJSONtoObject(userContent);
+    if (!userObj) {
+        return {};
+    }
+
+    return userObj;
 }
 
 export default handler;
