@@ -13,6 +13,7 @@ submitDOM.addEventListener('click', (e) => {
     for (const inputDOM of allInputsDOM) {
         const { id, value, dataset } = inputDOM;
         const validationRule = IsValid[dataset.validation];
+        console.log(validationRule);
         const [err, status] = validationRule(value);
         if (err) {
             errors.push(status);
@@ -24,7 +25,7 @@ submitDOM.addEventListener('click', (e) => {
 
     if (errors.length === 0) {
         const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
+        xhttp.onreadystatechange = function () {
             if (this.readyState === 4 && this.status === 200) {
                 const data = JSON.parse(this.responseText);
 
