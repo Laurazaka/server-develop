@@ -85,7 +85,7 @@ handler._method.post = async (data, callback) => {
         action: {
             type: 'redirect',
             href: '/blog',
-        },
+        }
     })
 }
 
