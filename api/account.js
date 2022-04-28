@@ -4,7 +4,7 @@ import { utils } from "../lib/utils.js";
 
 const handler = {};
 
-handler.account = async (data, callback) => {
+handler.account = async(data, callback) => {
     const acceptableMethods = ['get', 'post', 'put', 'delete'];
 
     if (acceptableMethods.includes(data.httpMethod)) {
@@ -19,7 +19,7 @@ handler._method = {};
 /**
  * Vartotojo paskyros sukurimas
  */
-handler._method.post = async (data, callback) => {
+handler._method.post = async(data, callback) => {
     // 1) reikia patikrinti ar data.payload (keys and values) yra teisingi
     const user = data.payload;
     if (typeof user !== 'object' || Object.keys(user).length !== 3) {
@@ -81,6 +81,7 @@ handler._method.post = async (data, callback) => {
     user.passwordChanges = 0;
     user.lastLoginDate = 0;
     user.loginHistory = [];
+    user.posts = [];
 
     // 6) sukuriame [email].json ir i ji irasome vartotojo objekta
     const [userCreateError] = await file.create('accounts', userFile, user);
@@ -104,7 +105,7 @@ handler._method.post = async (data, callback) => {
 /**
  * Vartotojo informacijos gavimas
  */
-handler._method.get = async (data, callback) => {
+handler._method.get = async(data, callback) => {
     const url = data.trimmedPath;
     const email = url.split('/')[2];
 
@@ -142,7 +143,7 @@ handler._method.get = async (data, callback) => {
 /**
  * Vartotojo informacijos atnaujinimas
  */
-handler._method.put = async (data, callback) => {
+handler._method.put = async(data, callback) => {
     const url = data.trimmedPath;
     const email = url.split('/')[2];
 
@@ -159,12 +160,12 @@ handler._method.put = async (data, callback) => {
     let newUserData = {};
 
     if (username && IsValid.username(username)) {
-        newUserData = { ...newUserData, username };
+        newUserData = {...newUserData, username };
         updatedValues++;
     }
 
     if (password && IsValid.password(password)) {
-        newUserData = { ...newUserData, password: utils.hash(password) };
+        newUserData = {...newUserData, password: utils.hash(password) };
         updatedValues++;
     }
 
@@ -213,7 +214,7 @@ handler._method.put = async (data, callback) => {
 /**
  * Vartotojo paskyros istrinimas
  */
-handler._method.delete = async (data, callback) => {
+handler._method.delete = async(data, callback) => {
     const url = data.trimmedPath;
     const email = url.split('/')[2];
 

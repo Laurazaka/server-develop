@@ -4,7 +4,7 @@ import { utils } from "../lib/utils.js";
 
 const handler = {};
 
-handler.blog = async (data, callback) => {
+handler.blog = async(data, callback) => {
     const acceptableMethods = ['get', 'post', 'put', 'delete'];
 
     if (acceptableMethods.includes(data.httpMethod)) {
@@ -19,7 +19,7 @@ handler._method = {};
 /**
  * Blog post sukurimas
  */
-handler._method.post = async (data, callback) => {
+handler._method.post = async(data, callback) => {
     const post = data.payload;
     if (typeof post !== 'object' || Object.keys(post).length !== 3) {
         return callback(200, {
@@ -79,20 +79,34 @@ handler._method.post = async (data, callback) => {
         })
     }
 
+    const updatedUser = {...data.user };
+    delete updatedUser.isLoggedIn;
+    updatedUser.posts.push(post.slug);
+    const [updateError] = await file.update('accounts', data.user.email + '.json', updatedUser);
+
+    if (updateError) {
+        return callback(200, {
+            status: 'Error',
+            msg: 'Klaida bandant atnaujinti vartotojo duomenis',
+        })
+    }
+
     return callback(200, {
         status: 'Success',
         msg: 'Blog post sukurtas sekmingai',
         action: {
             type: 'redirect',
             href: '/blog',
-        }
+        },
     })
+
+
 }
 
 /**
  * Blog post informacijos gavimas
  */
-handler._method.get = async (data, callback) => {
+handler._method.get = async(data, callback) => {
     const url = data.trimmedPath;
     const blogSlug = url.split('/')[2];
 
@@ -105,7 +119,7 @@ handler._method.get = async (data, callback) => {
 /**
  * Blog post informacijos atnaujinimas
  */
-handler._method.put = async (data, callback) => {
+handler._method.put = async(data, callback) => {
     const url = data.trimmedPath;
     const blogSlug = url.split('/')[2];
 
@@ -118,9 +132,37 @@ handler._method.put = async (data, callback) => {
 /**
  * Blog post istrinimas
  */
-handler._method.delete = async (data, callback) => {
+handler._method.delete = async(data, callback) => {
     const url = data.trimmedPath;
     const blogSlug = url.split('/')[2];
+
+    if (!data.user.posts.includes(blogSlug)) {
+        return callback(400, {
+            status: 'Error',
+            msg: 'Vartotojas neturi tokio straipsnio, todel negalejo buti istrinta',
+        })
+    }
+
+    const [deleteError] = await file.delete('blog', blogSlug + '.json');
+    if (deleteError) {
+        return callback(500, {
+            status: 'Error',
+            msg: 'Sistemai nepavyko istrinti posto',
+        })
+    }
+
+    const updatedUser = {...data.user };
+    delete updatedUser.isLoggedIn;
+    updatedUser.posts = updatedUser.posts.filter(post => post !== blogSlug);
+
+    const [updateError] = await file.update('accounts', data.user.email + '.json', updatedUser);
+
+    if (updateError) {
+        return callback(500, {
+            status: 'Error',
+            msg: 'Klaida bandant atnaujinti vartotojo duomenis',
+        })
+    }
 
     return callback(200, {
         status: 'Success',
